@@ -6,8 +6,8 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
 import akka.stream.Materializer
+import bio.ferlab.lineage.HttpClient.DefaultErrorResponse
 import bio.ferlab.lineage.MarquezClient._
-
 import spray.json.{DefaultJsonProtocol, enrichAny}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,77 +38,49 @@ class MarquezClient(baseUrl: String = "http://localhost:5000") extends SprayJson
 
   def createDataset(namespace: String, name: String, body: DatasetRequest)
                    (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
-  Future[Either[DefaultErrorResponse, DatasetResponse]] = {
-    val request =
-      HttpRequest(
-        method = HttpMethods.PUT,
-        uri = s"$namespacesUrl/$namespace/datasets/$name",
-        entity = HttpEntity(ContentTypes.`application/json`, body.toJson.toString())
-      )
-    unmarshalTo[DatasetResponse](Http().singleRequest(request))
-  }
+  Future[Either[DefaultErrorResponse, DatasetResponse]] =
+    HttpClient.PUT[DatasetRequest, DatasetResponse](s"$namespacesUrl/$namespace/datasets/$name", body)
 
   def getDataset(namespace: String, name: String)
-                (implicit ec: ExecutionContext, system: ActorSystem[Nothing]): Future[Either[DefaultErrorResponse, DatasetResponse]] = {
-    unmarshalTo[DatasetResponse](
-      Http().singleRequest(HttpRequest(uri = s"$namespacesUrl/$namespace/datasets/$name", method = HttpMethods.GET)))
-  }
+                (implicit ec: ExecutionContext, system: ActorSystem[Nothing]): Future[Either[DefaultErrorResponse, DatasetResponse]] =
+    HttpClient.GET[DatasetResponse](s"$namespacesUrl/$namespace/datasets/$name")
 
-  def getDatasets(namespace: String)(implicit ec: ExecutionContext, system: ActorSystem[Nothing]): Future[Either[DefaultErrorResponse, ListDatasetsResponseFormat]] = {
-    unmarshalTo[ListDatasetsResponseFormat](
-      Http().singleRequest(HttpRequest(uri = s"$namespacesUrl/$namespace/datasets", method = HttpMethods.GET)))
-  }
+  def getDatasets(namespace: String)(implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
+  Future[Either[DefaultErrorResponse, ListDatasetsResponseFormat]] =
+    HttpClient.GET[ListDatasetsResponseFormat](s"$namespacesUrl/$namespace/datasets")
 
   def createNamespace(name: String, body: NamespaceRequest)
                      (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
-  Future[Either[DefaultErrorResponse, NamespaceResponse]] = {
-    val request =
-      HttpRequest(
-        method = HttpMethods.PUT,
-        uri = s"$namespacesUrl/$name",
-        entity = HttpEntity(ContentTypes.`application/json`, body.toJson.toString())
-      )
-    unmarshalTo[NamespaceResponse](Http().singleRequest(request))
-  }
+  Future[Either[DefaultErrorResponse, NamespaceResponse]] =
+    HttpClient.PUT[NamespaceRequest, NamespaceResponse](s"$namespacesUrl/$name", body)
 
   def getNamespace(name: String)
-                  (implicit ec: ExecutionContext, system: ActorSystem[Nothing]): Future[Either[DefaultErrorResponse, NamespaceResponse]] = {
-    unmarshalTo[NamespaceResponse](Http().singleRequest(HttpRequest(uri = s"$namespacesUrl/$name", method = HttpMethods.GET)))
-  }
+                  (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
+  Future[Either[DefaultErrorResponse, NamespaceResponse]] =
+    HttpClient.GET[NamespaceResponse](s"$namespacesUrl/$name")
 
-  def getNamespaces()(implicit ec: ExecutionContext, system: ActorSystem[Nothing]): Future[Either[DefaultErrorResponse, ListNamespacesResponse]] = {
-    unmarshalTo[ListNamespacesResponse](Http().singleRequest(HttpRequest(uri = s"$namespacesUrl/", method = HttpMethods.GET)))
-  }
+  def getNamespaces()
+                   (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
+  Future[Either[DefaultErrorResponse, ListNamespacesResponse]] =
+    HttpClient.GET[ListNamespacesResponse](s"$namespacesUrl/")
 
   def createSource(name: String, body: SourceRequest)
                   (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
-  Future[Either[DefaultErrorResponse, SourceResponse]] = {
-    val request =
-      HttpRequest(
-        method = HttpMethods.PUT,
-        uri = s"$sourcesUrl/$name",
-        entity = HttpEntity(ContentTypes.`application/json`, body.toJson.toString())
-      )
-    unmarshalTo[SourceResponse](Http().singleRequest(request))
-  }
+  Future[Either[DefaultErrorResponse, SourceResponse]] =
+    HttpClient.PUT[SourceRequest, SourceResponse](s"$sourcesUrl/$name", body)
 
   def getSource(name: String)
                (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
-  Future[Either[DefaultErrorResponse, SourceResponse]] = {
-    unmarshalTo[SourceResponse](
-      Http().singleRequest(HttpRequest(uri = s"$sourcesUrl/$name", method = HttpMethods.GET)))
-  }
+  Future[Either[DefaultErrorResponse, SourceResponse]] =
+    HttpClient.GET[SourceResponse](s"$sourcesUrl/$name")
 
   def getSources()
                 (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
-  Future[Either[DefaultErrorResponse, ListSourcesResponse]] = {
-    unmarshalTo[ListSourcesResponse](
-      Http().singleRequest(HttpRequest(uri = s"$sourcesUrl/", method = HttpMethods.GET)))
-  }
+  Future[Either[DefaultErrorResponse, ListSourcesResponse]] =
+    HttpClient.GET[ListSourcesResponse](s"$sourcesUrl/")
 }
 
 object MarquezClient {
-  case class DefaultErrorResponse(statusCode: Int, message: String)
 
   case class NamespaceRequest(ownerName: String,
                               description: String)
