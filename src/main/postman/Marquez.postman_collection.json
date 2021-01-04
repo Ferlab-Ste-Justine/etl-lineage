@@ -1,0 +1,306 @@
+{
+	"info": {
+		"_postman_id": "3b88d3ac-68fc-4d80-94af-e34d7a27586f",
+		"name": "Marquez",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get namespaces",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ownerName\": \"cbotek@ferlab.bio\",\n    \"description\": \"My Namespace.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/namespaces",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"namespaces"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get sources",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ownerName\": \"cbotek@ferlab.bio\",\n    \"description\": \"My Namespace.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/sources",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"sources"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create namespace",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ownerName\": \"cbotek@ferlab.bio\",\n    \"description\": \"My Namespace.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/namespaces/{{namespace}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"{{namespace}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create source",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"type\": \"POSTGRESQL\",\n        \"connectionUrl\": \"jdbc:postgresql://localhost:5431/mydb\",\n        \"description\": \"My first source.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/sources/{{source}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"sources",
+						"{{source}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create dataset",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \n        \"type\": \"DB_TABLE\",\n        \"physicalName\": \"public.mytable\",\n        \"sourceName\": \"{{source}}\",\n        \"fields\": [\n          {\"name\": \"a\", \"type\": \"INTEGER\"},\n          {\"name\": \"b\", \"type\": \"TIMESTAMP\"},\n          {\"name\": \"c\", \"type\": \"INTEGER\"},\n          {\"name\": \"d\", \"type\": \"INTEGER\"}\n        ],\n        \"description\": \"My first dataset.\"\n      }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/namespaces/{{namespace}}/datasets/{{dataset}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"{{namespace}}",
+						"datasets",
+						"{{dataset}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Job",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"type\": \"BATCH\",\n        \"inputs\": [{\n          \"namespace\": \"{{namespace}}\", \n          \"name\": \"{{dataset}}\"\n        }],\n        \"outputs\": [],\n        \"location\": \"{{job-location}}\",\n        \"description\": \"My first job!\"\n      }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/namespaces/{{namespace}}/jobs/{{job}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"{{namespace}}",
+						"jobs",
+						"{{job}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create run for a job",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var data = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"runId\", data.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"args\": {\n        \"email\": \"cbotek@ferlab.bio\",\n        \"emailOnFailure\": false,\n        \"emailOnRetry\": true,\n        \"retries\": 1\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/namespaces/{{namespace}}/jobs/{{job}}/runs",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"{{namespace}}",
+						"jobs",
+						"{{job}}",
+						"runs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start a job",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/jobs/runs/{{runId}}/start",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"jobs",
+						"runs",
+						"{{runId}}",
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Complete a job",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/jobs/runs/{{runId}}/complete",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"jobs",
+						"runs",
+						"{{runId}}",
+						"complete"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
