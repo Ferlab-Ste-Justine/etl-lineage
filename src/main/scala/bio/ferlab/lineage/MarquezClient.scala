@@ -1,14 +1,13 @@
 package bio.ferlab.lineage
 
 import akka.actor.typed.ActorSystem
-import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
 import akka.stream.Materializer
 import bio.ferlab.lineage.HttpClient.DefaultErrorResponse
 import bio.ferlab.lineage.MarquezClient._
-import spray.json.{DefaultJsonProtocol, enrichAny}
+import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.{ExecutionContext, Future}
 
