@@ -28,13 +28,36 @@ class MarquezClient(baseUrl: String = "http://localhost:5000") extends SprayJson
   implicit val datasetIdFormat = jsonFormat2(DatasetId)
   implicit val datasetRequestFormat = jsonFormat5(DatasetRequest)
   implicit val datasetResponseFormat = jsonFormat12(DatasetResponse)
-
+  implicit val listDatasetsResponseFormat = jsonFormat1(ListDatasetsResponseFormat)
 
 
   val apiV1Url = s"$baseUrl/api/v1"
   val namespacesUrl = s"$apiV1Url/namespaces"
   val sourcesUrl = s"$apiV1Url/sources"
   val tagsUrl = s"$apiV1Url/tags"
+
+  def createDataset(namespace: String, name: String, body: DatasetRequest)
+                   (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
+  Future[Either[DefaultErrorResponse, DatasetResponse]] = {
+    val request =
+      HttpRequest(
+        method = HttpMethods.PUT,
+        uri = s"$namespacesUrl/$namespace/datasets/$name",
+        entity = HttpEntity(ContentTypes.`application/json`, body.toJson.toString())
+      )
+    unmarshalTo[DatasetResponse](Http().singleRequest(request))
+  }
+
+  def getDataset(namespace: String, name: String)
+                (implicit ec: ExecutionContext, system: ActorSystem[Nothing]): Future[Either[DefaultErrorResponse, DatasetResponse]] = {
+    unmarshalTo[DatasetResponse](
+      Http().singleRequest(HttpRequest(uri = s"$namespacesUrl/$namespace/datasets/$name", method = HttpMethods.GET)))
+  }
+
+  def getDatasets(namespace: String)(implicit ec: ExecutionContext, system: ActorSystem[Nothing]): Future[Either[DefaultErrorResponse, ListDatasetsResponseFormat]] = {
+    unmarshalTo[ListDatasetsResponseFormat](
+      Http().singleRequest(HttpRequest(uri = s"$namespacesUrl/$namespace/datasets", method = HttpMethods.GET)))
+  }
 
   def createNamespace(name: String, body: NamespaceRequest)
                      (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
@@ -49,17 +72,12 @@ class MarquezClient(baseUrl: String = "http://localhost:5000") extends SprayJson
   }
 
   def getNamespace(name: String)
-                  (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
-  Future[Either[DefaultErrorResponse, NamespaceResponse]] = {
-    unmarshalTo[NamespaceResponse](
-      Http().singleRequest(HttpRequest(uri = s"$namespacesUrl/$name", method = HttpMethods.GET)))
+                  (implicit ec: ExecutionContext, system: ActorSystem[Nothing]): Future[Either[DefaultErrorResponse, NamespaceResponse]] = {
+    unmarshalTo[NamespaceResponse](Http().singleRequest(HttpRequest(uri = s"$namespacesUrl/$name", method = HttpMethods.GET)))
   }
 
-  def getNamespaces()
-                  (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
-  Future[Either[DefaultErrorResponse, ListNamespacesResponse]] = {
-    unmarshalTo[ListNamespacesResponse](
-      Http().singleRequest(HttpRequest(uri = s"$namespacesUrl/", method = HttpMethods.GET)))
+  def getNamespaces()(implicit ec: ExecutionContext, system: ActorSystem[Nothing]): Future[Either[DefaultErrorResponse, ListNamespacesResponse]] = {
+    unmarshalTo[ListNamespacesResponse](Http().singleRequest(HttpRequest(uri = s"$namespacesUrl/", method = HttpMethods.GET)))
   }
 
   def createSource(name: String, body: SourceRequest)
@@ -116,7 +134,7 @@ object MarquezClient {
 
   case class ListSourcesResponse(sources: List[SourceResponse])
 
-  case class DatasetField(`type`: String, name: String, tags: List[String], description: String)
+  case class DatasetField(`type`: String, name: String, tags: List[String], description: Option[String] = None)
   case class DatasetId(namespace: String, name: String)
   case class DatasetRequest(`type`: String,
                             physicalName: String,
@@ -134,8 +152,10 @@ object MarquezClient {
                              namespace: String,
                              fields: List[DatasetField],
                              tags: List[String],
-                             lastModifiedAt: String,
+                             lastModifiedAt: Option[String] = None,
                              description: String)
+
+  case class ListDatasetsResponseFormat(datasets: List[DatasetResponse])
 
   def unmarshalTo[T](response: Future[HttpResponse])
                     (implicit ec: ExecutionContext, mat: Materializer, um: Unmarshaller[ResponseEntity, T]): Future[Either[DefaultErrorResponse, T]] = {
