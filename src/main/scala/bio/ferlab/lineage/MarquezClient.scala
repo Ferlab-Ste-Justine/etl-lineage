@@ -24,6 +24,11 @@ class MarquezClient(baseUrl: String = "http://localhost:5000") extends SprayJson
   implicit val sourceResponseFormat = jsonFormat6(SourceResponse)
   implicit val listSourcesResponseFormat = jsonFormat1(ListSourcesResponse)
 
+  implicit val datasetFieldFormat = jsonFormat4(DatasetField)
+  implicit val datasetIdFormat = jsonFormat2(DatasetId)
+  implicit val datasetRequestFormat = jsonFormat5(DatasetRequest)
+  implicit val datasetResponseFormat = jsonFormat12(DatasetResponse)
+
 
 
   val apiV1Url = s"$baseUrl/api/v1"
@@ -110,6 +115,27 @@ object MarquezClient {
                             description: String)
 
   case class ListSourcesResponse(sources: List[SourceResponse])
+
+  case class DatasetField(`type`: String, name: String, tags: List[String], description: String)
+  case class DatasetId(namespace: String, name: String)
+  case class DatasetRequest(`type`: String,
+                            physicalName: String,
+                            sourceName: String,
+                            fields: List[DatasetField],
+                            description: String)
+
+  case class DatasetResponse(id: DatasetId,
+                             `type`: String,
+                             name: String,
+                             physicalName: String,
+                             createdAt: String,
+                             updatedAt: String,
+                             sourceName: String,
+                             namespace: String,
+                             fields: List[DatasetField],
+                             tags: List[String],
+                             lastModifiedAt: String,
+                             description: String)
 
   def unmarshalTo[T](response: Future[HttpResponse])
                     (implicit ec: ExecutionContext, mat: Materializer, um: Unmarshaller[ResponseEntity, T]): Future[Either[DefaultErrorResponse, T]] = {
