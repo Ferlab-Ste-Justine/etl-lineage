@@ -29,7 +29,7 @@ object HttpClient {
     POST[REQUEST, RESPONSE](uri, body, HttpMethods.PUT)
   }
 
-  def POST[REQUEST, RESPONSE](uri: String, body: REQUEST, method: HttpMethod = HttpMethods.POST)
+  def POST[REQUEST, RESPONSE](uri: String, body: Option[REQUEST] = None, method: HttpMethod = HttpMethods.POST)
                              (implicit ec: ExecutionContext, system: ActorSystem[Nothing], mat: Materializer,
                               jw: JsonWriter[REQUEST], um: Unmarshaller[ResponseEntity, RESPONSE])
   : Future[Either[DefaultErrorResponse, RESPONSE]] = {
@@ -37,9 +37,23 @@ object HttpClient {
       HttpRequest(
         method = method,
         uri = uri,
-        entity = HttpEntity(ContentTypes.`application/json`, body.toJson.toString())
+        entity = HttpEntity(ContentTypes.`application/json`, body.map(_.toJson.toString()).getOrElse(""))
       )
     unmarshalTo[RESPONSE](Http().singleRequest(request))
+  }
+
+  def POST[REQUEST, RESPONSE](uri: String, body: REQUEST, method: HttpMethod)
+                             (implicit ec: ExecutionContext, system: ActorSystem[Nothing], mat: Materializer,
+                              jw: JsonWriter[REQUEST], um: Unmarshaller[ResponseEntity, RESPONSE])
+  : Future[Either[DefaultErrorResponse, RESPONSE]] = {
+    POST[REQUEST, RESPONSE](uri: String, body = Some(body), method = method)
+  }
+
+  def POST[REQUEST, RESPONSE](uri: String, body: REQUEST)
+                             (implicit ec: ExecutionContext, system: ActorSystem[Nothing], mat: Materializer,
+                              jw: JsonWriter[REQUEST], um: Unmarshaller[ResponseEntity, RESPONSE])
+  : Future[Either[DefaultErrorResponse, RESPONSE]] = {
+    POST[REQUEST, RESPONSE](uri: String, body = Some(body), method = HttpMethods.POST)
   }
 
 

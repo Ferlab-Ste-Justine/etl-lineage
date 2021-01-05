@@ -30,11 +30,16 @@ class MarquezClient(baseUrl: String = "http://localhost:5000") extends SprayJson
   implicit val jobResponseFormat = jsonFormat12(JobResponse)
   implicit val listJobsResponseFormat = jsonFormat1(ListJobsResponse)
 
+  implicit val runArgumentsFormat = jsonFormat4(RunArguments)
+  implicit val runRequestFormat = jsonFormat1(RunRequest)
+  implicit val runResponseFormat = jsonFormat10(RunResponse)
+
 
   val apiV1Url = s"$baseUrl/api/v1"
   val namespacesUrl = s"$apiV1Url/namespaces"
   val sourcesUrl = s"$apiV1Url/sources"
   val tagsUrl = s"$apiV1Url/tags"
+  val runsUrl = s"$apiV1Url/jobs/runs"
 
   def createDataset(namespace: String, name: String, body: DatasetRequest)
                    (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
@@ -91,6 +96,26 @@ class MarquezClient(baseUrl: String = "http://localhost:5000") extends SprayJson
                 (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
   Future[Either[DefaultErrorResponse, ListSourcesResponse]] =
     HttpClient.GET[ListSourcesResponse](s"$sourcesUrl/")
+
+  def createRun(namespace: String, job: String, body: RunRequest)
+                  (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
+  Future[Either[DefaultErrorResponse, RunResponse]] =
+    HttpClient.POST[RunRequest, RunResponse](s"$namespacesUrl/$namespace/jobs/$job/runs", body)
+
+  def startRun(runId: String)
+              (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
+  Future[Either[DefaultErrorResponse, RunResponse]] =
+    HttpClient.POST[String, RunResponse](s"$runsUrl/$runId/start")
+
+  def completeRun(runId: String)
+                 (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
+  Future[Either[DefaultErrorResponse, RunResponse]] =
+    HttpClient.POST[String, RunResponse](s"$runsUrl/$runId/complete")
+
+  def failRun(runId: String)
+             (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
+  Future[Either[DefaultErrorResponse, RunResponse]] =
+    HttpClient.POST[String, RunResponse](s"$runsUrl/$runId/fail")
 }
 
 object MarquezClient {
@@ -169,5 +194,22 @@ object MarquezClient {
 
   case class ListJobsResponse(jobs: List[JobResponse])
 
+  case class RunArguments(email: String,
+                          emailOnFailure: String,
+                          emailOnRetry: String,
+                          retries: String)
+
+  case class RunRequest(args: RunArguments)
+
+  case class RunResponse(id: String,
+                         createdAt: String,
+                         updatedAt: String,
+                         nominalStartTime: Option[String] = None,
+                         nominalEndTime: Option[String] = None,
+                         state: String,
+                         startedAt: Option[String] = None,
+                         endedAt: Option[String] = None,
+                         durationMs: Option[Long] = None,
+                         args: RunArguments)
 
 }
