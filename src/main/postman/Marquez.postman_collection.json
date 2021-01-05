@@ -6,6 +6,36 @@
 	},
 	"item": [
 		{
+			"name": "Create namespace",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ownerName\": \"cbotek@ferlab.bio\",\n    \"description\": \"My Namespace.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/namespaces/{{namespace}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"{{namespace}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get namespaces",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
@@ -32,6 +62,69 @@
 						"api",
 						"v1",
 						"namespaces"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get one namespace",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ownerName\": \"cbotek@ferlab.bio\",\n    \"description\": \"My Namespace.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/namespaces/{{namespace}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"{{namespace}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create source",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\": \"POSTGRESQL\",\n    \"connectionUrl\": \"jdbc:postgresql://localhost:5431/mydb\",\n    \"description\": \"My first source.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/sources/{{source}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"sources",
+						"{{source}}"
 					]
 				}
 			},
@@ -70,43 +163,16 @@
 			"response": []
 		},
 		{
-			"name": "Create namespace",
+			"name": "Get one source",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
-				"method": "PUT",
+				"method": "GET",
 				"header": [],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"ownerName\": \"cbotek@ferlab.bio\",\n    \"description\": \"My Namespace.\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseUrl}}:5000/api/v1/namespaces/{{namespace}}",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"v1",
-						"namespaces",
-						"{{namespace}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create source",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n        \"type\": \"POSTGRESQL\",\n        \"connectionUrl\": \"jdbc:postgresql://localhost:5431/mydb\",\n        \"description\": \"My first source.\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -136,7 +202,76 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{ \n        \"type\": \"DB_TABLE\",\n        \"physicalName\": \"public.mytable\",\n        \"sourceName\": \"{{source}}\",\n        \"fields\": [\n          {\"name\": \"a\", \"type\": \"INTEGER\"},\n          {\"name\": \"b\", \"type\": \"TIMESTAMP\"},\n          {\"name\": \"c\", \"type\": \"INTEGER\"},\n          {\"name\": \"d\", \"type\": \"INTEGER\"}\n        ],\n        \"description\": \"My first dataset.\"\n      }",
+					"raw": "{ \n        \"type\": \"DB_TABLE\",\n        \"physicalName\": \"public.mytable\",\n        \"sourceName\": \"{{source}}\",\n        \"fields\": [\n          {\"name\": \"a\", \"type\": \"INTEGER\"},\n          {\"name\": \"b\", \"type\": \"TIMESTAMP\"},\n          {\"name\": \"c\", \"type\": \"INTEGER\"},\n          {\"name\": \"d\", \"type\": \"INTEGER\"}\n        ],\n        \"description\": \"My first dataset.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/namespaces/{{namespace}}/datasets/{{dataset}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"{{namespace}}",
+						"datasets",
+						"{{dataset}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get datasets",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ownerName\": \"cbotek@ferlab.bio\",\n    \"description\": \"My Namespace.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/namespaces/{{namespace}}/datasets",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"{{namespace}}",
+						"datasets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get one dataset",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ownerName\": \"cbotek@ferlab.bio\",\n    \"description\": \"My Namespace.\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -168,7 +303,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n        \"type\": \"BATCH\",\n        \"inputs\": [{\n          \"namespace\": \"{{namespace}}\", \n          \"name\": \"{{dataset}}\"\n        }],\n        \"outputs\": [],\n        \"location\": \"{{job-location}}\",\n        \"description\": \"My first job!\"\n      }",
+					"raw": "{\n    \"type\": \"BATCH\",\n    \"inputs\": [\n        {\n            \"namespace\": \"{{namespace}}\",\n            \"name\": \"{{dataset}}\"\n        }\n    ],\n    \"outputs\": [],\n    \"location\": \"{{job-location}}\",\n    \"description\": \"My first job!\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -188,6 +323,72 @@
 						"{{namespace}}",
 						"jobs",
 						"{{job}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get jobs",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ownerName\": \"cbotek@ferlab.bio\",\n    \"description\": \"My Namespace.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/namespaces/{{namespace}}/jobs",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"{{namespace}}",
+						"jobs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get tags",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ownerName\": \"cbotek@ferlab.bio\",\n    \"description\": \"My Namespace.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}:5000/api/v1/tags",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"tags"
 					]
 				}
 			},
