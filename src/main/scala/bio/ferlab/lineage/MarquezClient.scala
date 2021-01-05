@@ -2,9 +2,6 @@ package bio.ferlab.lineage
 
 import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
-import akka.stream.Materializer
 import bio.ferlab.lineage.HttpClient.DefaultErrorResponse
 import bio.ferlab.lineage.MarquezClient._
 import spray.json.DefaultJsonProtocol
@@ -27,7 +24,11 @@ class MarquezClient(baseUrl: String = "http://localhost:5000") extends SprayJson
   implicit val datasetIdFormat = jsonFormat2(DatasetId)
   implicit val datasetRequestFormat = jsonFormat5(DatasetRequest)
   implicit val datasetResponseFormat = jsonFormat12(DatasetResponse)
-  implicit val listDatasetsResponseFormat = jsonFormat1(ListDatasetsResponseFormat)
+  implicit val listDatasetsResponseFormat = jsonFormat1(ListDatasetsResponse)
+
+  implicit val jobRequestFormat = jsonFormat5(JobRequest)
+  implicit val jobResponseFormat = jsonFormat12(JobResponse)
+  implicit val listJobsResponseFormat = jsonFormat1(ListJobsResponse)
 
 
   val apiV1Url = s"$baseUrl/api/v1"
@@ -45,8 +46,21 @@ class MarquezClient(baseUrl: String = "http://localhost:5000") extends SprayJson
     HttpClient.GET[DatasetResponse](s"$namespacesUrl/$namespace/datasets/$name")
 
   def getDatasets(namespace: String)(implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
-  Future[Either[DefaultErrorResponse, ListDatasetsResponseFormat]] =
-    HttpClient.GET[ListDatasetsResponseFormat](s"$namespacesUrl/$namespace/datasets")
+  Future[Either[DefaultErrorResponse, ListDatasetsResponse]] =
+    HttpClient.GET[ListDatasetsResponse](s"$namespacesUrl/$namespace/datasets")
+
+  def createJob(namespace: String, name: String, body: JobRequest)
+               (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
+  Future[Either[DefaultErrorResponse, JobResponse]] =
+    HttpClient.PUT[JobRequest, JobResponse](s"$namespacesUrl/$namespace/jobs/$name", body)
+
+  def getJob(namespace: String, name: String)
+            (implicit ec: ExecutionContext, system: ActorSystem[Nothing]): Future[Either[DefaultErrorResponse, JobResponse]] =
+    HttpClient.GET[JobResponse](s"$namespacesUrl/$namespace/jobs/$name")
+
+  def getJobs(namespace: String)(implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
+  Future[Either[DefaultErrorResponse, ListJobsResponse]] =
+    HttpClient.GET[ListJobsResponse](s"$namespacesUrl/$namespace/jobs")
 
   def createNamespace(name: String, body: NamespaceRequest)
                      (implicit ec: ExecutionContext, system: ActorSystem[Nothing]):
@@ -105,8 +119,14 @@ object MarquezClient {
 
   case class ListSourcesResponse(sources: List[SourceResponse])
 
-  case class DatasetField(`type`: String, name: String, tags: List[String], description: Option[String] = None)
-  case class DatasetId(namespace: String, name: String)
+  case class DatasetField(`type`: String,
+                          name: String,
+                          tags: List[String],
+                          description: Option[String] = None)
+
+  case class DatasetId(namespace: String,
+                       name: String)
+
   case class DatasetRequest(`type`: String,
                             physicalName: String,
                             sourceName: String,
@@ -126,15 +146,28 @@ object MarquezClient {
                              lastModifiedAt: Option[String] = None,
                              description: String)
 
-  case class ListDatasetsResponseFormat(datasets: List[DatasetResponse])
+  case class ListDatasetsResponse(datasets: List[DatasetResponse])
 
-  def unmarshalTo[T](response: Future[HttpResponse])
-                    (implicit ec: ExecutionContext, mat: Materializer, um: Unmarshaller[ResponseEntity, T]): Future[Either[DefaultErrorResponse, T]] = {
-    response
-      .flatMap {
-        case v if v.status.isSuccess() => Unmarshal(v.entity).to[T].map(r => Right(r).asInstanceOf[Either[DefaultErrorResponse, T]])
-        case error => Future.successful(Left(DefaultErrorResponse(error.status.intValue(), error.status.reason())))
-      }
-  }
+  case class JobRequest(`type`: String,
+                        inputs: List[DatasetId],
+                        outputs: List[DatasetId],
+                        location: String,
+                        description: String)
+
+  case class JobResponse(id: DatasetId,
+                         `type`: String,
+                         name: String,
+                         createdAt: String,
+                         updatedAt: String,
+                         namespace: String,
+                         inputs: List[DatasetId],
+                         outputs: List[DatasetId],
+                         location: String,
+                         context: Map[String, String],
+                         description: String,
+                         latestRun: Option[String] = None)
+
+  case class ListJobsResponse(jobs: List[JobResponse])
+
 
 }

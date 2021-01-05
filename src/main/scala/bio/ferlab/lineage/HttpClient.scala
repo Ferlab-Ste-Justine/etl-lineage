@@ -26,14 +26,22 @@ object HttpClient {
                   (implicit ec: ExecutionContext, system: ActorSystem[Nothing], mat: Materializer,
                    jw: JsonWriter[REQUEST], um: Unmarshaller[ResponseEntity, RESPONSE])
   : Future[Either[DefaultErrorResponse, RESPONSE]] = {
+    POST[REQUEST, RESPONSE](uri, body, HttpMethods.PUT)
+  }
+
+  def POST[REQUEST, RESPONSE](uri: String, body: REQUEST, method: HttpMethod = HttpMethods.POST)
+                             (implicit ec: ExecutionContext, system: ActorSystem[Nothing], mat: Materializer,
+                              jw: JsonWriter[REQUEST], um: Unmarshaller[ResponseEntity, RESPONSE])
+  : Future[Either[DefaultErrorResponse, RESPONSE]] = {
     val request =
       HttpRequest(
-        method = HttpMethods.PUT,
+        method = method,
         uri = uri,
         entity = HttpEntity(ContentTypes.`application/json`, body.toJson.toString())
       )
     unmarshalTo[RESPONSE](Http().singleRequest(request))
   }
+
 
   def GET[RESPONSE](uri: String)
                    (implicit ec: ExecutionContext, system: ActorSystem[Nothing],
