@@ -6,7 +6,7 @@ import org.apache.spark.sql.SparkSession
 import java.io.File
 import java.nio.file.{Files, Path}
 
-trait WithSparkSession {
+trait Spark {
 
   private val tmp = new File("tmp").getAbsolutePath
   implicit lazy val spark: SparkSession = SparkSession.builder()
@@ -24,7 +24,7 @@ trait WithSparkSession {
    * - Clears the output folder after execution
    *
    * @param prefix prefix of the temporary output folder
-   * @param block code block to execute
+   * @param block  code block to execute
    * @tparam T return type of the code block
    * @return the result of the code block
    */
@@ -37,4 +37,3 @@ trait WithSparkSession {
     }
   }
 }
-

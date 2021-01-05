@@ -2,7 +2,7 @@ package bio.ferlab.lineage
 
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import bio.ferlab.lineage.MarquezClient.{DatasetField, DatasetId, DatasetRequest, JobRequest, NamespaceRequest, RunArguments, RunRequest, SourceRequest}
+import bio.ferlab.lineage.MarquezService._
 import org.scalatest.GivenWhenThen
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -10,11 +10,11 @@ import org.scalatest.matchers.should.Matchers
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext}
 
-class MarquezClientSpec extends AnyFlatSpec with GivenWhenThen with WithSparkSession with Matchers {
+class MarquezServiceSpec extends AnyFlatSpec with GivenWhenThen with TestSparkSession with Matchers {
   implicit val system: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, "SingleRequest")
   implicit val executionContext: ExecutionContext = system.executionContext
   Given("Marquez App running locally")
-  val marquez = new MarquezClient()
+  val marquez = new MarquezService()
   val namespace = "my-namespace"
   val source = "my-source"
   val dataset = "my-dataset"

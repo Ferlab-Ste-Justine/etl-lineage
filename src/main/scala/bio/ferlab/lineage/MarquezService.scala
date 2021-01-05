@@ -3,12 +3,12 @@ package bio.ferlab.lineage
 import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import bio.ferlab.lineage.HttpClient.DefaultErrorResponse
-import bio.ferlab.lineage.MarquezClient._
+import bio.ferlab.lineage.MarquezService._
 import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MarquezClient(baseUrl: String = "http://localhost:5000") extends SprayJsonSupport with DefaultJsonProtocol {
+class MarquezService(val baseUrl: String = "http://localhost:5000") extends SprayJsonSupport with DefaultJsonProtocol {
 
   implicit val defaultErrorResponseFormat = jsonFormat2(DefaultErrorResponse)
 
@@ -26,13 +26,13 @@ class MarquezClient(baseUrl: String = "http://localhost:5000") extends SprayJson
   implicit val datasetResponseFormat = jsonFormat12(DatasetResponse)
   implicit val listDatasetsResponseFormat = jsonFormat1(ListDatasetsResponse)
 
-  implicit val jobRequestFormat = jsonFormat5(JobRequest)
-  implicit val jobResponseFormat = jsonFormat12(JobResponse)
-  implicit val listJobsResponseFormat = jsonFormat1(ListJobsResponse)
-
   implicit val runArgumentsFormat = jsonFormat4(RunArguments)
   implicit val runRequestFormat = jsonFormat1(RunRequest)
   implicit val runResponseFormat = jsonFormat10(RunResponse)
+
+  implicit val jobRequestFormat = jsonFormat5(JobRequest)
+  implicit val jobResponseFormat = jsonFormat12(JobResponse)
+  implicit val listJobsResponseFormat = jsonFormat1(ListJobsResponse)
 
 
   val apiV1Url = s"$baseUrl/api/v1"
@@ -118,7 +118,7 @@ class MarquezClient(baseUrl: String = "http://localhost:5000") extends SprayJson
     HttpClient.POST[String, RunResponse](s"$runsUrl/$runId/fail")
 }
 
-object MarquezClient {
+object MarquezService {
 
   case class NamespaceRequest(ownerName: String,
                               description: String)
@@ -190,7 +190,7 @@ object MarquezClient {
                          location: String,
                          context: Map[String, String],
                          description: String,
-                         latestRun: Option[String] = None)
+                         latestRun: Option[RunResponse] = None)
 
   case class ListJobsResponse(jobs: List[JobResponse])
 
@@ -209,7 +209,7 @@ object MarquezClient {
                          state: String,
                          startedAt: Option[String] = None,
                          endedAt: Option[String] = None,
-                         durationMs: Option[Long] = None,
+                         durationMs: Option[Int] = None,
                          args: RunArguments)
 
 }

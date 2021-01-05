@@ -9,6 +9,11 @@ import spray.json.{JsonWriter, enrichAny}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+/**
+ * Simple wrapper around Akka Http client
+ * Implements GET, POST and PUT
+ * Only Json request/response are supported
+ */
 object HttpClient {
 
   case class DefaultErrorResponse(statusCode: Int, message: String)
