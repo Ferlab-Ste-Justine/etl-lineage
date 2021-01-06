@@ -16,14 +16,14 @@ import scala.concurrent.{ExecutionContext, Future}
  */
 object HttpClient {
 
-  case class DefaultErrorResponse(statusCode: Int, message: String)
+  case class DefaultErrorResponse(statusCode: Int, reason: String, message: String)
 
   def unmarshalTo[T](response: Future[HttpResponse])
                     (implicit ec: ExecutionContext, mat: Materializer, um: Unmarshaller[ResponseEntity, T]): Future[Either[DefaultErrorResponse, T]] = {
     response
       .flatMap {
         case v if v.status.isSuccess() => Unmarshal(v.entity).to[T].map(r => Right(r).asInstanceOf[Either[DefaultErrorResponse, T]])
-        case error => Future.successful(Left(DefaultErrorResponse(error.status.intValue(), error.status.reason())))
+        case error => Future.successful(Left(DefaultErrorResponse(error.status.intValue(), error.status.reason(), error.toString())))
       }
   }
 

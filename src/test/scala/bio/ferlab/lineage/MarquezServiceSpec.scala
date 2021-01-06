@@ -13,17 +13,21 @@ import scala.concurrent.{Await, ExecutionContext}
 class MarquezServiceSpec extends AnyFlatSpec with GivenWhenThen with TestSparkSession with Matchers {
   implicit val system: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, "SingleRequest")
   implicit val executionContext: ExecutionContext = system.executionContext
-  Given("Marquez App running locally")
+
   val marquez = new MarquezService()
   val namespace = "my-namespace"
-  val source = "my-source"
-  val dataset = "my-dataset"
-  val job = "my-job"
+  val source = "my-postgres"
+  val destination = "my-s3"
+  val sourceDataset = "source-dataset"
+  val destinationDataset = "destination-dataset"
+  val job = "job-source-to-destination"
 
   val namespaceRequest = NamespaceRequest("me", "mine")
-  val sourceRequest = SourceRequest("POSTGRESQL", "jdbc:postgresql://localhost:5431/mydb", "src")
-  val datasetRequest = DatasetRequest("DB_TABLE", "public.mytable", source, List(DatasetField("INTEGER", "a", List(), Some("desc"))), "desc2")
-  val jobRequest = JobRequest("BATCH", List(DatasetId(namespace, dataset)), List(DatasetId(namespace, dataset)), "https://github.com/somewhere", "desc2")
+  val sourceRequest = SourceRequest("POSTGRESQL", "jdbc:postgresql://localhost:5431/mydb", "source")
+  val destinationRequest = SourceRequest("POSTGRESQL", "s3://mybucket/destination", "destination")
+  val datasetSourceRequest = DatasetRequest("DB_TABLE", "public.source", source, List(DatasetField("STRING", "a", List("SQL"), Some("field a")), DatasetField("INTEGER", "b", List("SQL"), Some("field b"))), "source table")
+  val datasetDestinationRequest = DatasetRequest("DB_TABLE", "public.destination", destination, List(DatasetField("INTEGER", "aaa", List("s3"), Some("field aaa"))), "destination table")
+  val jobRequest = JobRequest("BATCH", List(DatasetId(namespace, sourceDataset)), List(DatasetId(namespace, destinationDataset)), "https://github.com/somewhere", "desc2")
   val runRequest = RunRequest(args = RunArguments("cbotek@ferlab.bio", "true", "true", "1"))
 
   "MarquezClient" should "create a namespace" in {
@@ -45,12 +49,11 @@ class MarquezServiceSpec extends AnyFlatSpec with GivenWhenThen with TestSparkSe
     result3.right.get.namespaces should contain oneElementOf Seq(result.right.get)
   }
 
-  "MarquezClient" should "create a source" in {
+  "MarquezClient" should "create two sources" in {
     val resp = marquez.createSource(source, sourceRequest)
     val result = Await.result(resp, Duration.Inf)
     println(result)
     result.isRight shouldBe true
-    And("a source is created")
 
     val resp2 = marquez.getSource(source)
     val result2 = Await.result(resp2, Duration.Inf)
@@ -63,15 +66,20 @@ class MarquezServiceSpec extends AnyFlatSpec with GivenWhenThen with TestSparkSe
     println(result3)
     result3.isRight shouldBe true
     result3.right.get.sources should contain oneElementOf Seq(result.right.get)
+
+    val resp4 = marquez.createSource(destination, destinationRequest)
+    val result4 = Await.result(resp4, Duration.Inf)
+    println(result4)
+    result4.isRight shouldBe true
   }
 
-  "MarquezClient" should "create a dataset" in {
-    val resp = marquez.createDataset(namespace, dataset, datasetRequest)
+  "MarquezClient" should "create two datasets" in {
+    val resp = marquez.createDataset(namespace, sourceDataset, datasetSourceRequest)
     val result = Await.result(resp, Duration.Inf)
     println(result)
     result.isRight shouldBe true
 
-    val resp2 = marquez.getDataset(namespace, dataset)
+    val resp2 = marquez.getDataset(namespace, sourceDataset)
     val result2 = Await.result(resp2, Duration.Inf)
     println(result2)
     result2.isRight shouldBe true
@@ -82,6 +90,11 @@ class MarquezServiceSpec extends AnyFlatSpec with GivenWhenThen with TestSparkSe
     println(result3)
     result3.isRight shouldBe true
     result3.right.get.datasets should contain oneElementOf Seq(result.right.get)
+
+    val resp4 = marquez.createDataset(namespace, destinationDataset, datasetDestinationRequest)
+    val result4 = Await.result(resp4, Duration.Inf)
+    println(result4)
+    result4.isRight shouldBe true
   }
 
   "MarquezClient" should "create a job" in {

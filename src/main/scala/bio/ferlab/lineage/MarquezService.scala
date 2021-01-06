@@ -10,7 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class MarquezService(val baseUrl: String = "http://localhost:5000") extends SprayJsonSupport with DefaultJsonProtocol {
 
-  implicit val defaultErrorResponseFormat = jsonFormat2(DefaultErrorResponse)
+  implicit val defaultErrorResponseFormat = jsonFormat3(DefaultErrorResponse)
 
   implicit val namespaceRequestFormat = jsonFormat2(NamespaceRequest)
   implicit val namespaceResponseFormat = jsonFormat5(NamespaceResponse)
